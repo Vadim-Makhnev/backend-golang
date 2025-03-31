@@ -1,15 +1,23 @@
-# backend-golang
+# Backend Golang
 
-# How to start project:
+## How to Start the Project
 
-## RUN CONTAINERS:
+### Run Containers
 
-### docker-compose up -d
+To start the containers in detached mode, use the following command:
 
-# STOP CONTAINERS:
+```bash
+docker-compose up -d
+```
 
-### docker-compose down
+### Stop containers
 
-# FOR REBUILD:
+```bash
+docker-compose down
+```
 
-### docker-compose up --build -d
+### Rebuild containers
+
+```bash
+docker-compose up --build -d
+```
