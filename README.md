@@ -1,5 +1,3 @@
-# Backend Golang
-
 ## How to Start the Project
 
 ### Run Containers
