@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"errors"
+	"fmt"
 	"project/internal/dto"
 	"project/internal/service"
 
@@ -27,60 +29,89 @@ func RegisterNewRoutes(app *fiber.App, a * AuthHandler){
 
 
 
-func (a *AuthHandler) CreateUser(c *fiber.Ctx)error{
-	var user dto.UserRegister
+func (a *AuthHandler) CreateUser(c *fiber.Ctx) error {
+    var user dto.UserRegister
 
-	err := c.BodyParser(&user)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Cannot parse a body",
-		})
-	}
+    // Парсинг тела запроса
+    err := c.BodyParser(&user)
+    if err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+            "message": "Invalid request body",
+            "error":   err.Error(),
+        })
+    }
 
-	validate := validator.New()
+    // Валидация данных
+    validate := validator.New()
+    err = validate.Struct(user)
+    if err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+            "message": "Validation failed",
+            "error":   err.Error(),
+        })
+    }
 
-	err = validate.Struct(user)
-	if err != nil{
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid credentials: email, password, username",
-		})
-	}
+    // Вызов сервиса
+    err = a.service.CreateUser(user.Username, user.Email, user.Password)
+    if err != nil {
+        // Проверяем тип ошибки
+        if errors.Is(err, fmt.Errorf("user already exists")) {
+            return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+                "message": "User with this email already exists",
+            })
+        }
 
+        // Общая ошибка создания пользователя
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+            "message": "Failed to create user",
+            "error":   err.Error(),
+        })
+    }
 
-	err = a.service.CreateUser(user.Username, user.Email, user.Password)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Cannot create a user",
-		})
-	}
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "user registered successfully",
-	})
+    return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+        "message": "User registered successfully",
+    })
 }
 
-func (a *AuthHandler) LoginUser(c *fiber.Ctx) error{
-	var user dto.UserLogin
-	err := c.BodyParser(&user)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message":"cannot parse a body",
-		})
-	}
+func (a *AuthHandler) LoginUser(c *fiber.Ctx) error {
+    var user dto.UserLogin
 
-	validate := validator.New()
-	err = validate.Struct(user)
-	if err != nil{
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message":"invalid credentials",
-		})
-	}
-	err = a.service.LoginUser(user.Email, user.Password)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message":"invalid credentials",
-		})
-	}
-	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-		"message":"You login successfully",
-	})
+    // Парсинг тела запроса
+    err := c.BodyParser(&user)
+    if err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+            "message": "Invalid request body",
+            "error":   err.Error(),
+        })
+    }
+
+    // Валидация данных
+    validate := validator.New()
+    err = validate.Struct(user)
+    if err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+            "message": "Validation failed",
+            "error":   err.Error(),
+        })
+    }
+
+    // Вызов сервиса
+    err = a.service.LoginUser(user.Email, user.Password)
+    if err != nil {
+        if errors.Is(err, fmt.Errorf("user is not found")) {
+            return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+                "message": "Invalid credentials",
+            })
+        }
+
+        // Общая ошибка входа
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+            "message": "Failed to login",
+            "error":   err.Error(),
+        })
+    }
+
+    return c.Status(fiber.StatusOK).JSON(fiber.Map{
+        "message": "Logged in successfully",
+    })
 }

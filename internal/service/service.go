@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"project/internal/repository"
 
@@ -23,11 +22,12 @@ func (a *AuthService) CreateUser(username string, email string, password string)
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
-		return errors.New("cannot hash password")
+		return fmt.Errorf("failed to hash password: %w", err)
 	}
 	err = a.repo.CreateUser(username, email , string(hashedPassword))
 	if err != nil{
-		return errors.New("cannot create a user")
+		fmt.Printf("Error creating user: %v\n", err)
+        return fmt.Errorf("failed to create user: %w", err)
 	}
 	return nil
 }
@@ -35,11 +35,11 @@ func (a *AuthService) CreateUser(username string, email string, password string)
 func (a *AuthService) LoginUser(email string, password string) error{
 	user, err := a.repo.Login(email, password)
 	if err != nil {
-		return fmt.Errorf("cannot login %s", err)
+		return fmt.Errorf("failed to login user: %w", err)
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return fmt.Errorf("cannot to compare password %s", err)
+		return fmt.Errorf("invalid credentials: %w", err)
 	}
 	return nil
 }
