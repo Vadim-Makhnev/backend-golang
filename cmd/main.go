@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"project/config"
 	"project/handler"
 	"project/internal/model"
@@ -17,7 +18,10 @@ func main() {
 
 	db := config.ConnectDB()
 
-	db.AutoMigrate(&model.User{})
+	err := db.AutoMigrate(&model.User{})
+	if err != nil{
+		fmt.Printf("migration failed %s", err)
+	}	
 
 	app := fiber.New()
 	
