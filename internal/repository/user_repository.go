@@ -11,6 +11,7 @@ import (
 
 type UserRepoI interface {
 	CreateUser(string, string, string) error
+	Login(string, string ) (*model.User, error)
 }
 
 type UserReposiotry struct {
@@ -47,4 +48,14 @@ func (u *UserReposiotry) CreateUser(username string, email string, password stri
 
 	fmt.Println("User was created successful")
 	return nil
+}
+
+func (u *UserReposiotry) Login(email string, password string) (*model.User ,error){
+	var existingUser model.User
+	err := u.db.Where("email = ?", email).First(&existingUser).Error
+	if err != nil{
+		return nil, fmt.Errorf("user is not found")
+	}
+	
+	return &existingUser, nil
 }
