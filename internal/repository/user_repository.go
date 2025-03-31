@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"project/internal/model"
 
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
@@ -32,9 +33,14 @@ func (u *UserReposiotry) CreateUser(username string, email string, password stri
         Password: password,
     }
 
+	validate := validator.New()
+	err := validate.Struct(user)
+	if err != nil{
+		return fmt.Errorf("validation failed %s", err)
+	}
 
 	var existingUser model.User
-	err := u.db.Where("email = ?", email).First(&existingUser).Error
+	err = u.db.Where("email = ?", email).First(&existingUser).Error
 	if err == nil {
 		return fmt.Errorf("user already exists %s", email)
 	}else if !errors.Is(err, gorm.ErrRecordNotFound){
