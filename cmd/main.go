@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"project/config"
 	"project/handler"
 	"project/internal/model"
@@ -35,5 +36,5 @@ func main() {
 
 	handler.RegisterNewRoutes(app, handle)
 
-	app.Listen(":8080")
+	log.Fatal(app.Listen(":8080"))
 }
