@@ -19,7 +19,7 @@ func main() {
 
 	db := config.ConnectDB()
 
-	err := db.AutoMigrate(&model.User{})
+	err := db.AutoMigrate(&model.User{}, &model.Token{})
 	if err != nil{
 		fmt.Printf("migration failed %s", err)
 	}	
