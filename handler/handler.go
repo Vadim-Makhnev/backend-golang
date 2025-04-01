@@ -10,17 +10,22 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type AuthHandler struct {
-	service *service.AuthService
+type AuthHandlerI interface {
+    CreateUser(c *fiber.Ctx)error
+    LoginUser(c *fiber.Ctx)error
 }
 
-func NewAuthHandler(s * service.AuthService) *AuthHandler {
+type AuthHandler struct {
+	service service.AuthServiceI
+}
+
+func NewAuthHandler(s service.AuthServiceI) AuthHandlerI {
 	return &AuthHandler{
 		service: s,
 	}
 }
 
-func RegisterNewRoutes(app *fiber.App, a * AuthHandler){
+func RegisterNewRoutes(app *fiber.App, a AuthHandlerI){
 	api := app.Group("api")
 	
 	api.Post("/register", a.CreateUser)
@@ -96,7 +101,7 @@ func (a *AuthHandler) LoginUser(c *fiber.Ctx) error {
     }
 
     // Вызов сервиса
-    err = a.service.LoginUser(user.Email, user.Password)
+    err = a.service.LoginUser(c, user.Email, user.Password)
     if err != nil {
         if errors.Is(err, fmt.Errorf("user is not found")) {
             return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{

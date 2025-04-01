@@ -10,8 +10,8 @@ import (
 
 
 type UserRepoI interface {
-	CreateUser(string, string, string) error
-	Login(string, string ) (*model.User, error)
+	CreateUser(username string,email string, password string) error
+	Login(email string, password string ) (*model.User, error)
 }
 
 type UserReposiotry struct {
