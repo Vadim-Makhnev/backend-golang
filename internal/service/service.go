@@ -56,7 +56,10 @@ func (a *AuthService) LoginUser(c* fiber.Ctx, email string, password string) err
 	}
 
 	setAccessTokenCookie(c , sign)
-	utils.GenerateRefreshToken()
+	refreshToken := utils.GenerateRefreshToken()
+	if err := a.repo.AddToken(refreshToken, user.ID); err != nil{
+		return fmt.Errorf("failed to add token to the database")
+	}
 	return nil
 }
 

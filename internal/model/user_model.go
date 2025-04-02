@@ -12,4 +12,6 @@ type User struct {
     Password string `gorm:"not null"`
     Role string `gorm:"default:'user'"`
     IsSubscribe bool `gorm:"default:false"`
+
+     Token Token `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
