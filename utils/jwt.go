@@ -15,7 +15,7 @@ func GenerateAccessToken(userID string) (string, error) {
 
     // Создаем claims
     claims := jwt.MapClaims{
-        "user_id": userID,           // Полезная нагрузка (например, ID пользователя)
+        "user_id": userID ,           // Полезная нагрузка (например, ID пользователя)
         "exp":      expirationTime.Unix(), // Время истечения
     }
 

@@ -11,6 +11,7 @@ services:
       - DB_PASSWORD=mysecretpassword
       - DB_NAME=testdb
       - APP_ENV=development
+      - JWT_SECRET=jishfshshfshcsbbc
     networks:
       - app-network
     restart: always

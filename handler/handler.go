@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"project/internal/dto"
 	"project/internal/service"
+	"project/middleware"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -13,6 +14,7 @@ import (
 type AuthHandlerI interface {
     CreateUser(c *fiber.Ctx)error
     LoginUser(c *fiber.Ctx)error
+    Protected(c *fiber.Ctx) error
 }
 
 type AuthHandler struct {
@@ -27,9 +29,15 @@ func NewAuthHandler(s service.AuthServiceI) AuthHandlerI {
 
 func RegisterNewRoutes(app *fiber.App, a AuthHandlerI){
 	api := app.Group("api")
+    pages := app.Group("pages")
+
 	
 	api.Post("/register", a.CreateUser)
 	api.Post("/login", a.LoginUser)
+
+    pages.Use(middleware.JWTMiddleware())
+    pages.Get("main", a.Protected)
+
 }
 
 
@@ -119,4 +127,8 @@ func (a *AuthHandler) LoginUser(c *fiber.Ctx) error {
     return c.Status(fiber.StatusOK).JSON(fiber.Map{
         "message": "Logged in successfully",
     })
+}
+
+func (a * AuthHandler) Protected(c *fiber.Ctx) error {
+    return c.SendString("Protected route")
 }
